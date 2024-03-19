@@ -1,0 +1,71 @@
+{% extends 'base.html' %} {% block content %}
+<h1>Flask Todo App</h1>
+<form
+  action="{{ url_for('add_todo') }}"
+  method="post"
+  class="d-flex align-items-center"
+>
+  <input
+    type="text"
+    name="title"
+    id="title"
+    placeholder="Add a new todo"
+    class="form-control me-2"
+  />
+  <button type="submit" class="btn btn-primary">Add</button>
+</form>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %} {% if success %}
+<p class="success">{{ success }}</p>
+{% endif %}
+<ul class="list-group">
+  {% for todo in todos %}
+  <li class="list-group-item d-flex align-items-center justify-content-between">
+    <div class="form-check">
+      <input
+        type="checkbox"
+        id="todo-{{ todo.id }}"
+        name="todo-{{ todo.id }}"
+        class="form-check-input"
+        {%
+        if
+        todo.completed
+        %}
+        checked
+        {%
+        endif
+        %}
+      />
+      <label
+        for="todo-{{ todo.id }}"
+        class="form-check-label {% if todo.completed %} completed {% endif %}"
+        >{{ todo.title }}</label
+      >
+    </div>
+    <form
+      action="{{ url_for('delete_todo', id=todo.id) }}"
+      method="post"
+      style="display: inline"
+      class="d-flex align-items-center"
+    >
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+<script>
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(function (checkbox) {
+      checkbox.addEventListener("change", function () {
+        var label = this.nextElementSibling;
+        if (this.checked) {
+          label.classList.add("completed");
+        } else {
+          label.classList.remove("completed");
+        }
+      });
+    });
+</script>
+{% endblock %}
