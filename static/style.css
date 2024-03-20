@@ -1,3 +1,4 @@
+/* General styles */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -84,4 +85,57 @@ button:hover {
 
 .align-items-center {
   align-items: center;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    padding: 0.3rem;
+  }
+
+  input[type="text"],
+  input[type="checkbox"] {
+    margin-right: 0.5rem;
+  }
+
+  button {
+    margin: 5px;
+    padding: 0.3rem 0.8rem;
+  }
+}
+
+/* Flash message styles */
+.flash-messages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flash-messages li {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.flash-messages .error,
+.flash-messages .success {
+  display: inline-block;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.flash-messages .error {
+  color: red;
+}
+
+.flash-messages .success {
+  color: green;
 }

@@ -1,31 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-
+from flask import Flask, get_flashed_messages, render_template, request, redirect, url_for, flash
+from flask_migrate import Migrate
+from models.model import db, Todo
 app = Flask(__name__)
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SECRET_KEY'] = 'mysecretkey'
-db = SQLAlchemy(app)
-
-class Todo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    completed = db.Column(db.Boolean, default=False)
-
-    def __repr__(self):
-        return f'<Todo {self.id} - {self.title}>'
+app.config['SECRET_KEY'] = 'gunjan'
+db.init_app(app) 
+migrate = Migrate(app, db)
 
 @app.route('/')
 def home():
     todos = Todo.query.all()
-    error = None
-    success = None
-    return render_template('home.html', todos=todos, error=error, success=success)
+    messages = get_flashed_messages(with_categories=True)
+    return render_template('home.html', todos=todos, messages=messages)
 
 @app.route('/todos/add', methods=['POST'])
 def add_todo():
     title = request.form['title']
+    description = request.form.get('description')
     error = None
-    success = None
+
     if not title:
         error = 'Title is required'
     else:
@@ -34,20 +29,26 @@ def add_todo():
             error = 'Todo item already exists'
 
     if error:
-        todos = Todo.query.all()
-        return render_template('home.html', error=error, todos=todos, success=success)
+        flash(error, 'error')
+    else:
+        new_todo = Todo(title=title, description=description)
+        db.session.add(new_todo)
+        db.session.commit()
+        flash('Todo added successfully', 'success')
 
-    new_todo = Todo(title=title)
-    db.session.add(new_todo)
-    db.session.commit()
-    success = 'Todo added successfully'
-    flash(success, 'success')
     return redirect(url_for('home'))
 
-@app.route('/todos/complete/<int:id>', methods=['POST'])
+@app.route('/todos/complete/<int:id>', methods=['PUT'])
 def complete_todo(id):
     todo = Todo.query.get_or_404(id)
-    todo.completed= True
+    todo.status = 'COMPLETED'
+    db.session.commit()
+    return redirect(url_for('home'))
+
+@app.route('/todos/uncomplete/<int:id>', methods=['PUT'])
+def uncomplete_todo(id):
+    todo = Todo.query.get_or_404(id)
+    todo.status = 'PENDING'
     db.session.commit()
     return redirect(url_for('home'))
 
@@ -56,6 +57,7 @@ def delete_todo(id):
     todo = Todo.query.get_or_404(id)
     db.session.delete(todo)
     db.session.commit()
+    flash('Todo deleted successfully', 'success')
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
