@@ -1,0 +1,82 @@
+{% extends 'base.html' %} {% block content %}
+<h1>Flask Todo App</h1>
+
+<form
+  action="{{ url_for('add_todo') }}"
+  method="post"
+  class="d-flex align-items-center"
+>
+  <input
+    type="text"
+    name="title"
+    id="title"
+    placeholder="Add a new todo"
+    class="form-control me-2"
+  />
+  <input
+    type="text"
+    name="description"
+    id="description"
+    placeholder="Description"
+    class="form-control me-2"
+  />
+  <button type="submit" class="btn btn-primary">Add</button>
+</form>
+
+{% if messages %}
+<ul class="flash-messages">
+  {% for message in messages %}
+  <li class="{{ message[0] }}">{{ message[1] }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<ul class="list-group">
+  {% for todo in todos %}
+  <li class="list-group-item d-flex align-items-center justify-content-between">
+    <div class="form-check">
+      <input type="checkbox" id="todo-{{ todo.id }}" name="todo-{{ todo.id }}"
+      class="form-check-input" {% if todo.status == 'COMPLETED' %} checked {%
+      endif %} onclick="updateStatus('{{ todo.id }}', '{{ todo.status }}')">
+      <label
+        for="todo-{{ todo.id }}"
+        class="form-check-label {% if todo.status == 'COMPLETED' %} completed {% endif %}"
+        >{{ todo.title }}</label
+      >
+    </div>
+    <form
+      action="{{ url_for('delete_todo', id=todo.id) }}"
+      method="post"
+      style="display: inline"
+    >
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+<script>
+  function updateStatus(id, status) {
+    if (status === "COMPLETED") {
+      fetch(`/todos/uncomplete/${id}`, { method: "PUT" })
+        .then((response) => {
+          if (response.ok) {
+            window.location.reload();
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    } else {
+      fetch(`/todos/complete/${id}`, { method: "PUT" })
+        .then((response) => {
+          if (response.ok) {
+            window.location.reload();
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  }
+</script>
+{% endblock %}
